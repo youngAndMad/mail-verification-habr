@@ -1,0 +1,6 @@
+server:
+  port: 3000
+  host: localhost
+  schema: http
+  servlet:
+    context-path: /api/v1/user/
