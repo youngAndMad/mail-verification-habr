@@ -4,13 +4,11 @@ import danekerscode.dto.UserDTO;
 import danekerscode.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
+@CrossOrigin(origins = "*")
 public class UserController {
 
     private final UserService userService;
@@ -25,11 +23,11 @@ public class UserController {
 
     @PostMapping("confirm-registration")
     ResponseEntity<?> confirm(
-            @RequestParam String hash
+            @RequestParam String data
     ) {
         return ResponseEntity
                 .status(201)
-                .body(userService.confirmRegistration(hash));
+                .body(userService.confirmRegistration(data));
     }
 
 

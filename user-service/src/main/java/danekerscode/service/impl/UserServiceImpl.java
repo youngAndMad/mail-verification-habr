@@ -1,14 +1,16 @@
 package danekerscode.service.impl;
 
+import danekerscode.dto.KafkaEmailMessageDTO;
 import danekerscode.dto.UserDTO;
+import danekerscode.exception.EmailRegisteredException;
 import danekerscode.model.User;
 import danekerscode.repository.UserRepository;
 import danekerscode.service.Base64Service;
 import danekerscode.service.KafkaProducer;
-import danekerscode.service.MessageHelper;
 import danekerscode.service.UserService;
 import danekerscode.utils.StatusResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
@@ -19,7 +21,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final Base64Service base64;
     private final KafkaProducer kafkaProducer;
-    private final MessageHelper messageHelper;
 
     public static final String EMAIL_TOPIC = "email_message";
 
@@ -28,7 +29,7 @@ public class UserServiceImpl implements UserService {
         try {
             var dataToSend = base64.encode(userDTO);
 
-            kafkaProducer.produce(EMAIL_TOPIC, this.constructVerificationLink(dataToSend));
+            kafkaProducer.produce(EMAIL_TOPIC, new KafkaEmailMessageDTO(userDTO.email(), dataToSend));
 
             return new StatusResponse(
                     true, null
@@ -43,7 +44,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User confirmRegistration(String hash) {
+
         var userDTO = base64.decode(hash, UserDTO.class);
+
+        var optionalUser = this.userRepository.findByEmail(userDTO.email());
+
+        if (optionalUser.isPresent()){
+            throw new EmailRegisteredException("email: %s registered yet".formatted(userDTO.email()));
+        }
+
+
 
         var user = new User(
                 userDTO.name(),
@@ -54,8 +64,5 @@ public class UserServiceImpl implements UserService {
         return this.userRepository.save(user);
     }
 
-    private String constructVerificationLink(String dataToSend) {
-        var prefix = messageHelper.getPrefix();
-        return prefix + "verification?data=" + dataToSend;
-    }
+
 }
