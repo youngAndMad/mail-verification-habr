@@ -24,8 +24,6 @@ public class Base64ServiceImpl implements Base64Service {
 
     @Override
     public <T> T decode(String data, Class<T> to) {
-
-
         try {
 
             byte[] decodedBytes = Base64.getDecoder().decode(data);

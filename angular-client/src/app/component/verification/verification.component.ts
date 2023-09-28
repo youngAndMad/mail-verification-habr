@@ -12,12 +12,10 @@ export class VerificationComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
     private userService: UserService
   ) {
   }
 
-  msg: string | null;
   user: User
 
   ngOnInit(): void {
@@ -27,16 +25,15 @@ export class VerificationComponent implements OnInit {
       if (data) {
         this.userService.confirmRegistration(data)
           .subscribe(res => {
-              this.user = res
+            this.user = res
             console.log(res)
           }, err => {
             if (err) {
-              console.log(err)
-              this.msg =  'invalid confirmation link';
+              alert('invalid confirmation link');
             }
           })
       } else {
-        this.msg = 'invalid confirmation link'
+        alert('missing data')
       }
     })
   }

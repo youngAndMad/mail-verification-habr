@@ -31,9 +31,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public StatusResponse requestToRegistration(UserDTO userDTO) {
         try {
+            var optionalUser = this.userRepository.findByEmail(userDTO.getEmail());
+
+            if (optionalUser.isPresent()) {
+                throw new EmailRegisteredException("email: %s registered yet".formatted(userDTO.getEmail()));
+            }
+
+            System.out.println(userDTO);
             var dataToSend = base64.encode(userDTO);
 
-            kafkaProducer.produce(EMAIL_TOPIC, new KafkaEmailMessageDTO(userDTO.email(), dataToSend));
+            kafkaProducer.produce(EMAIL_TOPIC, new KafkaEmailMessageDTO(userDTO.getEmail(), dataToSend));
 
             return new StatusResponse(
                     true, null
@@ -51,20 +58,14 @@ public class UserServiceImpl implements UserService {
 
         var userDTO = base64.decode(hash, UserDTO.class);
 
-        var optionalUser = this.userRepository.findByEmail(userDTO.email());
-
-        if (optionalUser.isPresent()) {
-            throw new EmailRegisteredException("email: %s registered yet".formatted(userDTO.email()));
-        }
-
-        if (userDTO.time().isBefore(LocalDateTime.now().minusDays(1))) {
+        if (userDTO.getTime().isBefore(LocalDateTime.now().minusDays(1))) {
             throw new LinkExpiredException();
         }
 
         var user = new User(
-                userDTO.name(),
-                userDTO.surname(),
-                userDTO.email()
+                userDTO.getName(),
+                userDTO.getSurname(),
+                userDTO.getEmail()
         );
 
         return this.userRepository.save(user);

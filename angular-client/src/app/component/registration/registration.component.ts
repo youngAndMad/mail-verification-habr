@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {User} from "../../model/User";
 import {UserService} from "../../service/user.service";
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
@@ -29,11 +29,13 @@ export class RegistrationComponent {
     let surname = this.findInRegistrationForm('surname')
     let email = this.findInRegistrationForm('email')
 
-    this.userService.requestToRegistration({
-      name, surname, email
-    }).subscribe((res: StatusResponse) => {
-      console.log(res)
-    })
+    let userDTO = {name, surname, email}
+
+    this.userService.requestToRegistration(userDTO)
+      .subscribe((res: StatusResponse) => {
+          alert(res)
+        }
+      )
   }
 
   private findInRegistrationForm(
@@ -41,5 +43,6 @@ export class RegistrationComponent {
   ) {
     return this.registrationForm.get(controlName)?.value as string
   }
+
 
 }
