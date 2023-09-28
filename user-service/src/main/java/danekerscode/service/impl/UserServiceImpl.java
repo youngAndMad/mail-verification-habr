@@ -3,6 +3,7 @@ package danekerscode.service.impl;
 import danekerscode.dto.KafkaEmailMessageDTO;
 import danekerscode.dto.UserDTO;
 import danekerscode.exception.EmailRegisteredException;
+import danekerscode.exception.LinkExpiredException;
 import danekerscode.model.User;
 import danekerscode.repository.UserRepository;
 import danekerscode.service.Base64Service;
@@ -12,6 +13,9 @@ import danekerscode.utils.StatusResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 
 @Service
@@ -49,11 +53,13 @@ public class UserServiceImpl implements UserService {
 
         var optionalUser = this.userRepository.findByEmail(userDTO.email());
 
-        if (optionalUser.isPresent()){
+        if (optionalUser.isPresent()) {
             throw new EmailRegisteredException("email: %s registered yet".formatted(userDTO.email()));
         }
 
-
+        if (userDTO.time().isBefore(LocalDateTime.now().minusDays(1))) {
+            throw new LinkExpiredException();
+        }
 
         var user = new User(
                 userDTO.name(),
