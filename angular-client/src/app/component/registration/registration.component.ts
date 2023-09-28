@@ -33,7 +33,7 @@ export class RegistrationComponent {
 
     this.userService.requestToRegistration(userDTO)
       .subscribe((res: StatusResponse) => {
-          alert(res)
+          alert(JSON.stringify(res))
         }
       )
   }

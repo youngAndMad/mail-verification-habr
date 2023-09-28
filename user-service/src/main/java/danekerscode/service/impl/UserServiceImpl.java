@@ -37,7 +37,6 @@ public class UserServiceImpl implements UserService {
                 throw new EmailRegisteredException("email: %s registered yet".formatted(userDTO.getEmail()));
             }
 
-            System.out.println(userDTO);
             var dataToSend = base64.encode(userDTO);
 
             kafkaProducer.produce(EMAIL_TOPIC, new KafkaEmailMessageDTO(userDTO.getEmail(), dataToSend));
